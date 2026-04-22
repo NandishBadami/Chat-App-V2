@@ -1,0 +1,25 @@
+{% extends 'chat/layout.html' %}
+
+{% block body %}
+    <h1>Welcome {{ user }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        Message New User: <br>
+        <input required type="text" name="username" placeholder="Enter Correct Username">
+        <button type="submit">Message</button>
+    </form>
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: red;">{{message}}</p>
+        {% endfor %}
+    {% endif %}
+    {% for friend in friends %}
+        <br>
+        <a style="text-decoration: none;" href="{% url 'chat_app' friend.0 %}"><div style="border: 1px solid black;">
+            {{ friend.0 }}
+            {% if friend.1 %}
+                <span style="background-color: red;">🔔 <b>{{ friend.1 | length }}</b></span>
+            {% endif %}
+        </div></a>
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'chat/layout.html' %}
+
+{% block body %}
+    <a href="/"><- Back to HomePage</a>
+    <h1 id="friendName">{{friend}} is <span id="status" style="color: red;">Offline</span></h1>
+    <div>
+        Message:
+        <input type="text" name="text" placeholder="Enter Text">
+        <button id="sendButton">Message</button>
+    </div>
+    <div id="messages">
+    {% for message in in_messages %}
+        <br>
+        <div style="border: 1px solid black;">
+            {{message.sender}}:
+            <b>{{message.text}}</b>
+            <p>{{message.timestamp}}</p>
+            {% if message.sender == request.user %}
+                {% if message.read %}
+                    <p>Read: ✅</p>
+                {% else %}
+                    <p>Read: ❌</p>
+                {% endif %}
+            {% endif %}
+        </div> 
+    {% empty %}
+        <p style="color: blue;">Send message to "{{friend}}", to start conversation.</p>
+    {% endfor %}
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <script>
+        const friendName = '{{ friend }}';
+        const username = '{{ request.user }}'
+        const socket = io();
+
+        socket.emit('join', {
+            username: username,
+            friend:  friendName
+        });
+
+        socket.on('status', data => {
+            const status = document.querySelector('#status');
+            if(data.status == 'Online') {
+                status.style.color = 'green';
+                const reads = document.querySelectorAll('.read');
+                reads.forEach(read => read.textContent='✅');
+            }
+            else status.style.color = 'red';
+            status.textContent = data.status;
+        });
+
+        socket.on('message', data => appendMessage(data));
+
+        function appendMessage(data) {
+            const messageContainer = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.style.border = '1px solid black'
+            messageElement.innerHTML = `
+                ${data.username}:
+                <b>${data.message}</b>
+                <p>${new Date(data.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
+                ${data.username == username ? `<p class='read'>Read: ${data.read? '✅': '❌'}</p>`: ''}
+            `;
+            //if(data.read) messageElement.innerHTML = '<p>✅</p>';
+            //else messageElement.innerHTML = '<p>❌</p>';
+            messageContainer.prepend(document.createElement('br'), messageElement);
+        }
+
+        const messageInput = document.querySelector('input');
+        const sendButton = document.querySelector('#sendButton');
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if(message) {
+                socket.emit('send_message', {message:message});
+                messageInput.value = '';
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', e => {
+            if (e.key == 'Enter') sendMessage();
+        });
+    </script>
+{% endblock %}

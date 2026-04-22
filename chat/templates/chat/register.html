@@ -1,0 +1,21 @@
+{% extends 'chat/layout.html' %}
+
+{% block body %}
+    <h1>Register</h1>
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: red;">{{message}}</p>
+        {% endfor %}
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        Username:
+        <input type="text" name="username"><br>
+        Password:
+        <input type="password" name="password"><br>
+        Confirm Password:
+        <input type="password" name="confirm_password"><br>
+        <p>Have an Account. Login <a href="{% url 'login' %}">Here</a>.</p>
+        <button type="submit">register</button>
+    </form>
+{% endblock %}
