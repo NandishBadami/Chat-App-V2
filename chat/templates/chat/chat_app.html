@@ -17,9 +17,9 @@
             <p>{{message.timestamp}}</p>
             {% if message.sender == request.user %}
                 {% if message.read %}
-                    <p>Read: ✅</p>
+                    <p class="read">Read: ✅</p>
                 {% else %}
-                    <p>Read: ❌</p>
+                    <p class="read">Read: ❌</p>
                 {% endif %}
             {% endif %}
         </div> 
@@ -43,7 +43,7 @@
             if(data.status == 'Online') {
                 status.style.color = 'green';
                 const reads = document.querySelectorAll('.read');
-                reads.forEach(read => read.textContent='✅');
+                reads.forEach(read => read.textContent='Read: ✅');
             }
             else status.style.color = 'red';
             status.textContent = data.status;
